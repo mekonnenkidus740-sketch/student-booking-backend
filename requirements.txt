@@ -1,0 +1,6 @@
+Flask
+flask_sqlalchemy
+pymysql
+bcrypt
+gunicorn
+psycopg2-binary
