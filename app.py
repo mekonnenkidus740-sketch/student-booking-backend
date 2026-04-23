@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import os
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -6,13 +5,15 @@ import bcrypt
 
 app = Flask(__name__)
 
+uri = os.getenv("DATABASE_URL")
+if uri and uri.startswith("postgres://"):
+    uri = uri.replace("postgres://", "postgresql://", 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = uri
 # -----------------------------
 # DATABASE CONFIG (POSTGRESQL)
 # -----------------------------
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
-    "DATABASE_URL",
-    "postgresql://student_db_r711_user:rEMCaZLa2FEbc76s9a5cV22WEHXOKEbQ@dpg-d7euktnaqgkc739tkm4g-a.oregon-postgres.render.com/student_db_r711"
-)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
 
 # ✅ Fix for Render postgres:// issue
 if app.config['SQLALCHEMY_DATABASE_URI'].startswith("postgres://"):
@@ -171,8 +172,6 @@ def register_google():
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-
-=======
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import bcrypt
@@ -341,5 +340,4 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
 
->>>>>>> ae88042e2bed2cf2596ffcf2c7fc425b6f0c1fd7
     app.run(host="0.0.0.0", port=5000, debug=True)
