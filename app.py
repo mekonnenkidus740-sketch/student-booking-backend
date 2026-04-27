@@ -6,9 +6,11 @@ import bcrypt
 app = Flask(__name__)
 
 # -----------------------------
-# DATABASE CONFIG (ONLY THIS)
+# DATABASE CONFIG (POSTGRESQL)
 # -----------------------------
 uri = os.getenv("DATABASE_URL")
+
+print("DATABASE URL:", uri)  # debug
 
 if uri and uri.startswith("postgres://"):
     uri = uri.replace("postgres://", "postgresql://", 1)
@@ -22,6 +24,8 @@ db = SQLAlchemy(app)
 # MODEL
 # -----------------------------
 class Student(db.Model):
+    tablename = "student"  # 🔥 force correct table name
+
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(50))
     last_name = db.Column(db.String(50))
@@ -45,7 +49,7 @@ def home():
     return "Server is working!"
 
 # -----------------------------
-# REGISTER (SAFE VERSION)
+# REGISTER
 # -----------------------------
 @app.route("/register", methods=["POST"])
 def register():
@@ -102,8 +106,40 @@ def register():
         return jsonify({"error": str(e)}), 500
 
 # -----------------------------
-# RUN
+# LOGIN
 # -----------------------------
-if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
+@app.route("/login", methods=["POST"])
+def login():
+    try:
+        data = request.get_json()
+
+        input_value = data.get("input")
+        password = data.get("password")
+
+        student = Student.query.filter(
+            (Student.email == input_value) |
+            (Student.username == input_value)
+        ).first()
+
+        if student and bcrypt.checkpw(
+            password.encode('utf-8'),
+            student.password.encode('utf-8')
+        ):
+            return jsonify({
+                "message": "Login successful",
+                "firstName": student.first_name,
+                "lastName": student.last_name
+            }), 200
+
+        return jsonify({"message": "Invalid credentials"}), 401
+
+    except Exception as e:
+        print("ERROR:", str(e))
+        return jsonify({"error": str(e)}), 500
+
+# -----------------------------
+# CREATE TABLES (CRITICAL FIX)
+# -----------------------------
+with app.app_context():
+    print("Creating tables if not exist...")
+    db.create_all()
