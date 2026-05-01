@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "329706468046",
+    "project_id": "student-booking-app-6de60",
+    "storage_bucket": "student-booking-app-6de60.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:329706468046:android:9fdb19c5e8acd9d58ed69f",
+        "android_client_info": {
+          "package_name": "com.example.my_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBY6Mp8LYfYuU8Rio0PRqpO7lTaJpYrjXI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
