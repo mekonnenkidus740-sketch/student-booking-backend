@@ -82,37 +82,38 @@ def register():
         if not data:
             return jsonify({"error": "No JSON received"}), 400
 
-        first = data.get("firstName")
-        last = data.get("lastName")
-        input_value = data.get("input")
-        password = data.get("password")
+        first = data.get("firstName", "").strip()
+        last = data.get("lastName", "").strip()
+        input_value = data.get("input", "").strip().lower()
+        password = data.get("password", "").strip()
 
         if not first or not last or not input_value or not password:
             return jsonify({"message": "All fields required"}), 400
 
         masked_last = mask_last_name(last)
 
-        # Detect email or username
-        if "@gmail.com" in input_value:
+        email = None
+        username = None
+
+        # detect email
+        if "@" in input_value:
             email = input_value
-            username = None
         else:
-            email = None
             username = input_value
 
-        # ✅ FIXED duplicate check
-        if email:
-            existing = Student.query.filter_by(email=email).first()
-        else:
-            existing = Student.query.filter_by(username=username).first()
+        # check existing user
+        existing = Student.query.filter(
+            (Student.email == email) |
+            (Student.username == username)
+        ).first()
 
         if existing:
             return jsonify({"message": "User already exists"}), 400
 
         hashed_password = bcrypt.hashpw(
-            password.encode('utf-8'),
+            password.encode("utf-8"),
             bcrypt.gensalt()
-        ).decode('utf-8')
+        ).decode("utf-8")
 
         student = Student(
             first_name=first,
