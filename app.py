@@ -6,11 +6,10 @@ import bcrypt
 app = Flask(__name__)
 
 # -----------------------------
-# DATABASE CONFIG (POSTGRESQL)
+# DATABASE CONFIG
 # -----------------------------
 uri = os.getenv("DATABASE_URL")
-
-print("DATABASE URL:", uri)  # debug
+print("DATABASE URL:", uri)
 
 if uri and uri.startswith("postgres://"):
     uri = uri.replace("postgres://", "postgresql://", 1)
@@ -24,7 +23,7 @@ db = SQLAlchemy(app)
 # MODEL
 # -----------------------------
 class Student(db.Model):
-    tablename = "student"  # 🔥 force correct table name
+    __tablename__ = "student"
 
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(50))
@@ -49,6 +48,15 @@ def home():
     return "Server is working!"
 
 # -----------------------------
+# RESET DB (FIXED)
+# -----------------------------
+@app.route("/reset-db")
+def reset_db():
+    db.drop_all()
+    db.create_all()
+    return "Database reset done"
+
+# -----------------------------
 # REGISTER
 # -----------------------------
 @app.route("/register", methods=["POST"])
@@ -69,7 +77,8 @@ def register():
 
         masked_last = mask_last_name(last)
 
-        if "@gmail.com" in input_value:
+        # Better email detection
+        if "@" in input_value:
             email = input_value
             username = None
         else:
@@ -102,7 +111,7 @@ def register():
         return jsonify({"message": "Registration successful"}), 201
 
     except Exception as e:
-        print("ERROR:", str(e))
+        print("REGISTER ERROR:", str(e))
         return jsonify({"error": str(e)}), 500
 
 # -----------------------------
@@ -134,12 +143,18 @@ def login():
         return jsonify({"message": "Invalid credentials"}), 401
 
     except Exception as e:
-        print("ERROR:", str(e))
+        print("LOGIN ERROR:", str(e))
         return jsonify({"error": str(e)}), 500
 
 # -----------------------------
-# CREATE TABLES (CRITICAL FIX)
+# CREATE TABLES
 # -----------------------------
 with app.app_context():
     print("Creating tables if not exist...")
     db.create_all()
+    # -----------------------------
+# RUN (for local only)
+# -----------------------------
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
